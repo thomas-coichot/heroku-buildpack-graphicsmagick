@@ -30,7 +30,7 @@ echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
-GM_SOURCE="$(mktemp -t graphicsmagick_xxxxxx)"
+GM_SOURCE="$(mktemp -t graphicsmagick_XXXXX)"
 rm -rf $GM_SOURCE
 mkdir -p $GM_SOURCE
 echo $GM_SOURCE
