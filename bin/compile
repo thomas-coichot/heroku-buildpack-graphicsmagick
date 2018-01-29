@@ -55,7 +55,7 @@ echo "Copying and linking graphicsmagick binaries to vendor" | arrow
 rsync -rv --exclude="share/" --exclude="include/" $GM_CACHE_DIR/ $GM_VENDOR_DIR | pv -pl | indent
 
 mkdir -p $BUILD_DIR/bin/
-ln -sf $GM_VENDOR_DIR/bin/* $BUILD_DIR/bin/
+cp -R $GM_VENDOR_DIR/bin/* $BUILD_DIR/bin/
 
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$BUILD_DIR/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
