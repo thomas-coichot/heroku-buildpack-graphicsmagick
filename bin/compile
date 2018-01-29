@@ -44,13 +44,17 @@ then
   echo "Building for the first time this will take a while." | indent
   ./configure --prefix=$GM_BUILD_DIR 2>&1 | indent
   make install 2>&1 | indent
+
+  echo "Cleaning the download directory" | indent
+  rm -rf $GM_SOURCE_DIR
 fi
 
-echo "Copying graphicsmagick binaries to vendor" | arrow
+echo "Copying and linking graphicsmagick binaries to vendor" | arrow
 
-mkdir -p "$BUILD_DIR/bin/"
-cp -R $GM_BUILD_DIR/. $GM_VENDOR_DIR
-cp $GM_VENDOR_DIR/bin/* $BUILD_DIR/bin/
+rsync -r --exclude="share/" --exclude="include/" $GM_BUILD_DIR/ $GM_VENDOR_DIR
+
+mkdir -p $BUILD_DIR/bin/
+ln -sf $GM_VENDOR_DIR/bin/* $BUILD_DIR/bin/
 
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
