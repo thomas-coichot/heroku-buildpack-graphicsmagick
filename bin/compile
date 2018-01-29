@@ -41,8 +41,8 @@ then
   cd $GM_SOURCE_DIR/GraphicsMagick-$GRAPHICS_MAGICK_VERSION
 
   echo "Building for the first time this will take a while." | indent
-  ./configure --prefix=$GM_CACHE_DIR | pv -pl -N "${indent}" >/dev/null
-  make install | pv -pl -N "${indent}" >/dev/null
+  ./configure --prefix=$GM_CACHE_DIR >/dev/null
+  make install >/dev/null
 
   echo "Cleaning the download directory" | indent
   rm -rf $GM_SOURCE_DIR
