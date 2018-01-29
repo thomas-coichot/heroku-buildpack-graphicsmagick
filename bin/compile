@@ -17,36 +17,40 @@ arrow() {
   sed -u 's/^/-----> /'
 }
 
-function mktmpdir() {
-  dir=$(mktemp -t graphicsmagick-$1-XXXX)
-  rm -rf $dir
-  mkdir -p $dir
-  echo $dir
-}
-
 echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
-
 # we need this directory, it's our destination
-gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
-mkdir -p $gm_lib_path
+GM_VENDOR_DIR=$BUILD_DIR/vendor/graphicsmagick
+rm -rf $GM_VENDOR_DIR/*
+mkdir -p $GM_VENDOR_DIR
 
-GM_SOURCE="$(mktemp -t graphicsmagick_XXXXX)"
-rm -rf $GM_SOURCE
-mkdir -p $GM_SOURCE
-echo $GM_SOURCE
+# We'll cache the build here
+GM_SOURCE_DIR=$CACHE_DIR/graphicsmagick-$GRAPHICS_MAGICK_VERSION
+GM_BUILD_DIR=$CACHE_DIR/graphicsmagick
+mkdir -p $GM_BUILD_DIR
 
-package="https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/$GRAPHICS_MAGICK_VERSION/GraphicsMagick-$GRAPHICS_MAGICK_VERSION.tar.gz"
+if [ "$GM_FORCE_REBUILD" = 'true' ] || [ -z "$(ls -L $GM_BUILD_DIR)" ] && [ -z "$(ls -L $GM_VENDOR_DIR)" ]
+then
+  echo "Building runtime environment for graphicsmagick" | arrow
+  rm -rf $GM_BUILD_DIR
+  rm -rf $GM_SOURCE_DIR
+  mkdir -p $GM_SOURCE_DIR
+  mkdir -p $GM_BUILD_DIR
 
-curl $package -L -o - | tar xzf - -C $GM_SOURCE
-cd $GM_SOURCE/GraphicsMagick-$GRAPHICS_MAGICK_VERSION
+  PACKAGE="https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/$GRAPHICS_MAGICK_VERSION/GraphicsMagick-$GRAPHICS_MAGICK_VERSION.tar.gz"
 
-echo "Building runtime environment for graphicsmagick" | arrow
-echo "This may take a while" | indent
-./configure --prefix=$gm_lib_path && make install
+  curl $PACKAGE -L -o - | tar xzf - -C $GM_SOURCE_DIR 2>&1 | indent
+  cd $GM_SOURCE_DIR/GraphicsMagick-$GRAPHICS_MAGICK_VERSION
 
-cd $gm_lib_path
+  echo "Building for the first time this will take a while." | indent
+  ./configure --prefix=$GM_BUILD_DIR 2>&1 | indent
+  make install 2>&1 | indent
+fi
+
+echo "Copying graphicsmagick binaries to vendor" | arrow
+
 mkdir -p "$BUILD_DIR/bin/"
-cp $gm_lib_path/bin/* $BUILD_DIR/bin/
+cp -R $GM_BUILD_DIR/. $GM_VENDOR_DIR
+cp $GM_VENDOR_DIR/bin/* $BUILD_DIR/bin/
 
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
