@@ -30,7 +30,7 @@ echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
-GM_SOURCE="$(mktemp -t graphicsmagick)"
+GM_SOURCE="$(mktemp -t graphicsmagick_xxxxxx)"
 rm -rf $GM_SOURCE
 mkdir -p $GM_SOURCE
 echo $GM_SOURCE
@@ -40,13 +40,14 @@ package="https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick
 curl $package -L -o - | tar xzf - -C $GM_SOURCE
 cd $GM_SOURCE/GraphicsMagick-$GRAPHICS_MAGICK_VERSION
 
+echo "Building runtime environment for graphicsmagick" | arrow
+echo "This may take a while" | indent
 ./configure --prefix=$gm_lib_path && make install
 
 cd $gm_lib_path
 mkdir -p "$BUILD_DIR/bin/"
 cp $gm_lib_path/bin/* $BUILD_DIR/bin/
 
-echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
 echo "export LD_LIBRARY_PATH=\"/app/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" >> $BUILD_DIR/.profile.d/graphicsmagick.sh
