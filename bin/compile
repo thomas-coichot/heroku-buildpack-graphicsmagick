@@ -9,11 +9,6 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
-if [ "$STACK" == "" ]; then
-  echo "STACK environment variable must be set indicating which build to use (i.e. STACK=cedar or STACK=cedar-14)"
-  exit 1
-fi
-
 indent() {
   sed -u 's/^/       /'
 }
@@ -29,83 +24,32 @@ function mktmpdir() {
   echo $dir
 }
 
-function package_download() {
-  local remote location
-  remote="$1"
-  location="$2"
-
-  mkdir -p $location
-  package="http://s3.amazonaws.com/${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${remote}"
-  curl $package -s -o - | tar xzf - -C $location
-}
-
-echo "Installing zlib $ZLIB_VERSION" | arrow
-
-# we need this directory, it's our destination
-zlib_lib_path=$BUILD_DIR/vendor/zlib
-mkdir -p $zlib_lib_path
-
-# vendor directories
-VENDORED_ZLIB="$(mktmpdir libpng)"
-package_download "${ZLIB_REMOTE_PATH}" "${VENDORED_ZLIB}"
-
-cp -R $VENDORED_ZLIB/* $zlib_lib_path
-
-echo "Installing libpng $LIBPNG_VERSION" | arrow
-
-# we need this directory, it's our destination
-libpng_lib_path=$BUILD_DIR/vendor/libpng
-mkdir -p $libpng_lib_path
-
-# vendor directories
-VENDORED_LIBPNG="$(mktmpdir libpng)"
-package_download "${LIBPNG_REMOTE_PATH}" "${VENDORED_LIBPNG}"
-
-cp -R $VENDORED_LIBPNG/* $libpng_lib_path
-
-echo "Installing nasm $NASM_VERSION" | arrow
-
-# we need this directory, it's our destination
-nasm_lib_path=$BUILD_DIR/vendor/nasm
-mkdir -p $nasm_lib_path
-
-# vendor directories
-VENDORED_NASM="$(mktmpdir nasm)"
-package_download "${NASM_REMOTE_PATH}" "${VENDORED_NASM}"
-
-cp -R $VENDORED_NASM/* $nasm_lib_path
-
-echo "Installing libjpeg-turbo $LIBJPEG_TURBO_VERSION" | arrow
-
-# we need this directory, it's our destination
-libjpeg_turbo_lib_path=$BUILD_DIR/vendor/libjpeg-turbo
-mkdir -p $libjpeg_turbo_lib_path
-
-# vendor directories
-VENDORED_LIBJPEG_TURBO="$(mktmpdir libjpeg)"
-package_download "${LIBJPEG_TURBO_REMOTE_PATH}" "${VENDORED_LIBJPEG_TURBO}"
-
-cp -R $VENDORED_LIBJPEG_TURBO/* $libjpeg_turbo_lib_path
-
 echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 
 # we need this directory, it's our destination
 gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
-# vendor directories
-VENDORED_GRAPHICSMAGICK="$(mktmpdir graphicsmagick)"
-package_download "${REMOTE_PATH}" "${VENDORED_GRAPHICSMAGICK}"
+GM_SOURCE="$(mktemp -t graphicsmagick)"
+rm -rf $GM_SOURCE
+mkdir -p $GM_SOURCE
+echo $GM_SOURCE
 
+package="https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/$GRAPHICS_MAGICK_VERSION/GraphicsMagick-$GRAPHICS_MAGICK_VERSION.tar.gz"
+
+curl $package -L -o - | tar xzf - -C $GM_SOURCE
+cd $GM_SOURCE/GraphicsMagick-$GRAPHICS_MAGICK_VERSION
+
+./configure --prefix=$gm_lib_path && make install
+
+cd $gm_lib_path
 mkdir -p "$BUILD_DIR/bin/"
-cp $VENDORED_GRAPHICSMAGICK/bin/* "$BUILD_DIR/bin/"
-
-cp -R $VENDORED_GRAPHICSMAGICK/* $gm_lib_path
+cp $gm_lib_path/bin/* $BUILD_DIR/bin/
 
 echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
-echo "export LD_LIBRARY_PATH=\"/app/vendor/nasm/lib/:/app/vendor/libjpeg-turbo/lib/:/app/vendor/zlib/lib/:/app/vendor/libpng/lib/:/app/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" >> $BUILD_DIR/.profile.d/graphicsmagick.sh
+echo "export LD_LIBRARY_PATH=\"/app/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" >> $BUILD_DIR/.profile.d/graphicsmagick.sh
 
 cat <<EOF > export
 export PATH=$BUILD_DIR/bin:$PATH
