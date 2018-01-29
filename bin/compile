@@ -58,8 +58,10 @@ mkdir -p $BUILD_DIR/bin/
 cp -R $GM_VENDOR_DIR/bin/* $BUILD_DIR/bin/
 
 mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\"\$BUILD_DIR/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
-echo "export LD_LIBRARY_PATH=\"$HOME/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" >> $BUILD_DIR/.profile.d/graphicsmagick.sh
+GM_BASH_FILE=$BUILD_DIR/.profile.d/graphicsmagick.sh
+echo "export PATH=\"\$HOME/bin:\$PATH\"" > $GM_BASH_FILE
+echo "export MAGICK_CONFIGURE_PATH=\"\$HOME/vendor/graphicsmagick/lib/GraphicsMagick-\$GRAPHICS_MAGICK_VERSION/config\"" >> $GM_BASH_FILE
+echo "export LD_LIBRARY_PATH=\"\$HOME/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" >> $GM_BASH_FILE
 
 cat <<EOF > export
 export PATH=$BUILD_DIR/bin:$PATH
