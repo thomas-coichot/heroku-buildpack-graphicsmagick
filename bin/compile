@@ -25,33 +25,34 @@ mkdir -p $GM_VENDOR_DIR
 
 # We'll cache the build here
 GM_SOURCE_DIR=$CACHE_DIR/graphicsmagick-$GRAPHICS_MAGICK_VERSION
-GM_BUILD_DIR=$CACHE_DIR/graphicsmagick
-mkdir -p $GM_BUILD_DIR
+GM_CACHE_DIR=$CACHE_DIR/graphicsmagick
+mkdir -p $GM_CACHE_DIR
 
-if [ "$GM_FORCE_REBUILD" = 'true' ] || [ -z "$(ls -L $GM_BUILD_DIR)" ] && [ -z "$(ls -L $GM_VENDOR_DIR)" ]
+if [ "$GM_FORCE_REBUILD" = 'true' ] || [ -z "$(ls -L $GM_CACHE_DIR)" ] && [ -z "$(ls -L $GM_VENDOR_DIR)" ]
 then
   echo "Building runtime environment for graphicsmagick" | arrow
-  rm -rf $GM_BUILD_DIR
+  rm -rf $GM_CACHE_DIR
   rm -rf $GM_SOURCE_DIR
   mkdir -p $GM_SOURCE_DIR
-  mkdir -p $GM_BUILD_DIR
+  mkdir -p $GM_CACHE_DIR
 
   PACKAGE="https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/$GRAPHICS_MAGICK_VERSION/GraphicsMagick-$GRAPHICS_MAGICK_VERSION.tar.gz"
-
   curl $PACKAGE -L -o - | tar xzf - -C $GM_SOURCE_DIR 2>&1 | indent
   cd $GM_SOURCE_DIR/GraphicsMagick-$GRAPHICS_MAGICK_VERSION
 
   echo "Building for the first time this will take a while." | indent
-  ./configure --prefix=$GM_BUILD_DIR 2>&1 | indent
-  make install 2>&1 | indent
+  ./configure --prefix=$GM_CACHE_DIR | pv -pl -N "${indent}" >/dev/null
+  make install | pv -pl -N "${indent}" >/dev/null
 
   echo "Cleaning the download directory" | indent
   rm -rf $GM_SOURCE_DIR
+
+  cd $LP_DIR
 fi
 
 echo "Copying and linking graphicsmagick binaries to vendor" | arrow
 
-rsync -r --exclude="share/" --exclude="include/" $GM_BUILD_DIR/ $GM_VENDOR_DIR
+rsync -rv --exclude="share/" --exclude="include/" $GM_CACHE_DIR/ $GM_VENDOR_DIR | pv -pl | indent
 
 mkdir -p $BUILD_DIR/bin/
 ln -sf $GM_VENDOR_DIR/bin/* $BUILD_DIR/bin/
