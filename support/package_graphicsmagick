@@ -2,6 +2,14 @@
 set -e
 [ "$DEBUG" == "true" ] && set -x
 
+indent() {
+  sed -u 's/^/       /'
+}
+
+arrow() {
+  sed -u 's/^/-----> /'
+}
+
 source `dirname $0`/../configs.sh
 
 pushd `dirname $0`/.. >> /dev/null
@@ -36,83 +44,83 @@ rm -rf $tempdir
 mkdir -p $tempdir
 cd $tempdir
 
-echo ">>> Building zlib"
+echo "Building zlib" | arrow
 
 zlib_local_path=$tempdir/zlib-${ZLIB_VERSION}.tgz
 
 # build and package zlib for heroku
 cp -R $home/vendor/zlib-${ZLIB_VERSION} $tempdir
 cd $tempdir/zlib-${ZLIB_VERSION}
-./configure --prefix /app/vendor/zlib && make install
+./configure --prefix=/app/vendor/zlib && make install
 
-echo ">>> Uploading zlib"
+echo "Uploading zlib" | arrow
 
 cd /app/vendor/zlib && tar -czvf $zlib_local_path .
 $basedir/aws/s3 put $S3_BUCKET $S3_ROOT_FOLDER/$STACK/$ZLIB_REMOTE_PATH $zlib_local_path
 
-echo ">>> Building libpng"
+echo "Building libpng" | arrow
 
 libpng_local_path=$tempdir/libpng-${LIBPNG_VERSION}.tgz
 
 # build and package libpng for heroku
 cp -R $home/vendor/libpng-${LIBPNG_VERSION} $tempdir
 cd $tempdir/libpng-${LIBPNG_VERSION}
-./configure --prefix /app/vendor/libpng && make install
+./configure --prefix=/app/vendor/libpng && make install
 
-echo ">>> Uploading libpng artifact"
-echo "    to ${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${LIBPNG_REMOTE_PATH}"
-echo "    from ${libpng_local_path}"
+echo "Uploading libpng artifact" | arrow
+echo "to ${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${LIBPNG_REMOTE_PATH}" | indent
+echo "from ${libpng_local_path}" | indent
 
 cd /app/vendor/libpng && tar -czvf $libpng_local_path .
 $basedir/aws/s3 put $S3_BUCKET $S3_ROOT_FOLDER/$STACK/$LIBPNG_REMOTE_PATH $libpng_local_path
 
-echo ">>> Building nasm"
+echo "Building nasm" | arrow
 
 nasm_local_path=$tempdir/nasm-${NASM_VERSION}.tgz
 
 # build and package nasm for heroku
 cp -R $home/vendor/nasm-${NASM_VERSION} $tempdir
 cd $tempdir/nasm-${NASM_VERSION}
-./configure --prefix /app/vendor/nasm && make install
+./configure --prefix=/app/vendor/nasm && make install
 
-echo ">>> Uploading nasm artifact"
-echo "    to ${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${NASM_REMOTE_PATH}"
-echo "    from ${nasm_local_path}"
+echo "Uploading nasm artifact" | arrow
+echo "to ${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${NASM_REMOTE_PATH}" | indent
+echo "from ${nasm_local_path}" | indent
 
 cd /app/vendor/nasm && tar -czvf $nasm_local_path .
 $basedir/aws/s3 put $S3_BUCKET $S3_ROOT_FOLDER/$STACK/$NASM_REMOTE_PATH $nasm_local_path
 
-echo ">>> Building libjpeg-turbo"
+echo "Building libjpeg-turbo" | arrow
 
 libjpeg_turbo_local_path=$tempdir/libjpeg_turbo-${LIBJPEG_TURBO_VERSION}.tgz
 
 cp -R $home/vendor/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} $tempdir
 cd $tempdir/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}
-PATH=$PATH:/app/vendor/nasm/bin bash -c './configure --prefix /app/vendor/libjpeg_turbo && make install'
+PATH=$PATH:/app/vendor/nasm/bin bash -c './configure --prefix=/app/vendor/libjpeg_turbo && make install'
 
-echo ">>> Uploading libjpeg-turbo artifact"
-echo "    to ${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${LIBJPEG_TURBO_REMOTE_PATH}"
-echo "    from ${libjpeg_turbo_local_path}"
+echo "Uploading libjpeg-turbo artifact" | arrow
+echo "to ${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${LIBJPEG_TURBO_REMOTE_PATH}" | indent
+echo "from ${libjpeg_turbo_local_path}" | indent
 
 cd /app/vendor/libjpeg_turbo && tar -czvf $libjpeg_turbo_local_path .
 $basedir/aws/s3 put $S3_BUCKET $S3_ROOT_FOLDER/$STACK/$LIBJPEG_TURBO_REMOTE_PATH $libjpeg_turbo_local_path
 
-echo ">>> Downloading graphicsmagick"
+echo "Downloading graphicsmagick" | arrow
 
 gm_local_path=$tempdir/graphcismagick-${GRAPHICS_MAGICK_VERSION}.tgz
 gm_sources=$tempdir/graphicsmagick-${GRAPHICS_MAGICK_VERSION}.tar.gz
 curl -L https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/${GRAPHICS_MAGICK_VERSION}/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}.tar.gz > $gm_sources
 tar -C $tempdir -x -z -f $gm_sources
 
-echo ">>> Building graphicsmagick"
+echo "Building graphicsmagick" | arrow
 
 # build and package imagemagick for heroku
 cd $tempdir/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}
-./configure --prefix /app/vendor/graphicsmagick && make install
+./configure --prefix=/app/vendor/graphicsmagick && make install
 
-echo ">>> Uploading graphics magick artifact"
-echo "    to ${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${REMOTE_PATH}"
-echo "    from ${gm_local_path}"
+echo "Uploading graphics magick artifact" | arrow
+echo "to ${S3_BUCKET}/${S3_ROOT_FOLDER}/${STACK}/${REMOTE_PATH}" | indent
+echo "from ${gm_local_path}" | indent
 
 cd /app/vendor/graphicsmagick && tar -czvf $gm_local_path .
 $basedir/aws/s3 put $S3_BUCKET $S3_ROOT_FOLDER/$STACK/$REMOTE_PATH $gm_local_path
