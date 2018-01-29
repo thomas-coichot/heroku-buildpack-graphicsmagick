@@ -12,11 +12,25 @@ Use the GraphicsMagick (1.3.25) inside Heroku.
 
 Requires [heroku-buildpack-apt](https://github.com/heroku/heroku-buildpack-apt)
 
-Insert the buildpacks before the main buildpack for your application:
+Insert these buildpacks before the main buildpack for your application:
 Make sure the `apt` buildpack is included before this buildpack.
+
 ```
 heroku buildpacks:add --index 1 https://github.com/heroku/heroku-buildpack-apt
 heroku buildpacks:add --index 2 https://github.com/mcollina/heroku-buildpack-graphicsmagick.git
+```
+
+Include these at the beginning of your `Aptfile`
+```
+:repo:deb http://http.us.debian.org/debian stretch main
+
+libgraphicsmagick1-dev
+libgraphicsmagick++1-dev
+libjpeg-turbo
+libpng-dev
+zlib1g-dev
+libjasper-dev
+libjasper1
 ```
 
 The next time you push your application it should install graphicsmagick before
