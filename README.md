@@ -4,11 +4,9 @@ heroku-buildpack-graphicsmagick
 ## Not Actively Maintained.
 If you wish to continue development on this please fork it to your own repo.
 
-Use the GraphicsMagick (1.3.25) inside Heroku.
+Use the GraphicsMagick (1.3.30) inside Heroku.
 
 ## Usage
-
-### Only tested on `heroku-16` stack
 
 Requires [heroku-buildpack-apt](https://github.com/heroku/heroku-buildpack-apt)
 
