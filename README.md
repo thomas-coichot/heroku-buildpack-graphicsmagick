@@ -12,7 +12,7 @@ Make sure the `apt` buildpack is included before this buildpack.
 
 ```
 heroku buildpacks:add --index 1 https://github.com/heroku/heroku-buildpack-apt
-heroku buildpacks:add --index 2 https://github.com/bogini/heroku-buildpack-graphicsmagick
+heroku buildpacks:add --index 2 https://github.com/thomas-coichot/heroku-buildpack-graphicsmagick
 ```
 
 Include these at the beginning of your `Aptfile`
