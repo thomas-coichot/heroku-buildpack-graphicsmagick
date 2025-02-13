@@ -36,7 +36,7 @@ libwmf-dev
 libx11-dev
 libxext-dev
 libxml2-dev
-libsharpyuv
+libsharpyuv-dev
 perl
 sharutils
 transfig
